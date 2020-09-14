@@ -321,6 +321,13 @@ class Adamax(Optimizer):
                 self.accumulators[k] = np.zeros(v.shape)
         for k in list(w.keys()):
             ############## To Do ################
-
+            #compute momentum
+            self.momentum[k] = self.beta_1 * self.momentum[k] + (1-self.beta_1) * w_grads[k]
+            #add bias-corrected for momentum
+            momentum_t = self.momentum[k] / (1 - self.beta_1**(iteration+1))
+            #compute second gradient
+            self.accumulators[k] = np.maximum([self.beta_2 * self.accumulators[k], np.absolute(w_grads[k])])
+            #update new model parameters                               
+            new_w[k] = w[k] - self.lr * momentum_t / self.accumulators[k]
             #####################################
         return new_w

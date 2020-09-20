@@ -94,7 +94,6 @@ class linear(operator):
             output: numpy array with shape(batch, out_features)
         """
         ############ To Do ##############
-        output = None   
         output = np.matmul(input, weights) + bias
         #################################
         return output

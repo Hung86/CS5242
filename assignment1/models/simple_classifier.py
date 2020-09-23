@@ -2,27 +2,7 @@ from nn.layers import *
 from nn.loss import *
 
 class simple_classifier():
-
-    def __init__(self, n_in, n_out1, n_out2):
-        """Initialization
-
-        # Arguments
-            n_in: the number of input features
-            n_out1: the output features of first fully connected layer
-            n_out2: the output features of first fully connected layer
-
-        # Returns
-            new_xs: dictionary, new weights of model
-        """
-        print('----------------------11')
-        self.linear1 = Linear(n_in,n_out1)
-        self.linear2= Linear(n_out1,n_out2)
-        self.relu = ReLU()
-        self.softmax_cross_entropy = SoftmaxCrossEntropy(n_out2)
-        
-        # cacehs to save intermedia results of forward
-        self.caches = []
-        
+ 
     def __init__(self, n_in, n_out1, n_out2, n_out3):
         """Initialization
 
@@ -35,7 +15,6 @@ class simple_classifier():
         # Returns
             new_xs: dictionary, new weights of model
         """
-        print('----------------------22')
         self.linear1 = Linear(n_in, n_out1)
         self.linear2 = Linear(n_out1, n_out2)
         self.linear3= Linear(n_out2, n_out3)

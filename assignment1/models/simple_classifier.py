@@ -47,17 +47,17 @@ class simple_classifier():
 
         caches = [X] # to save intermedia results for backward pass
         
-        # layer 1
+        # layer 1 forward
         out1 = self.linear1.forward(X)
         caches += [out1]
         out1 = self.relu.forward(out1)
         caches += [out1]
 
-        # layer 2
+        # layer 2 forward
         out2 = self.linear2.forward(out1)
         caches += [out2]
         
-        # layer 3
+        # layer 3 forward
         out3 = self.linear3.forward(out2)
         caches += [out3]
 
@@ -75,15 +75,18 @@ class simple_classifier():
         inp = self.caches.pop()
         in_grad = self.softmax_cross_entropy.backward(inp, y)
 
-        # TODO layer 3 backward
+        # TODO 
+        #layer 3 backward
         inp_l3 = self.caches.pop()
         in_grad_l3 = self.linear3.backward(in_grad, inp_l3)
         
-        # TODO layer 2 backward
+        # TODO 
+        #layer 2 backward
         inp_l2 = self.caches.pop()
         in_grad_l2 = self.linear2.backward(in_grad_l3, inp_l2)
         
-        # TODO layer 1 backward
+        # TODO 
+        #layer 1 backward
         inp_re = self.caches.pop()
         in_grad_re = self.relu.backward(in_grad_l2, inp_re)
         

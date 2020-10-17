@@ -94,7 +94,7 @@ class linear(operator):
             output: numpy array with shape(batch, out_features)
         """
         ############ To Do ##############
-        output = None   
+        output = np.matmul(input, weights) + bias
         #################################
         return output
 
@@ -113,9 +113,9 @@ class linear(operator):
         """
 
         ############ To Do ##############
-        in_grad = None
-        w_grad = None
-        b_grad = None    
+        in_grad = np.matmul(out_grad, weights.T)
+        w_grad = np.matmul(input.T, out_grad)
+        b_grad = np.sum(out_grad, axis=0)    
         #################################
         return in_grad, w_grad, b_grad
 
@@ -192,12 +192,12 @@ class leaky_relu(operator):
 
     def forward(self, input):
         ############ To Do ##############
-        output = None    
+        output = np.where(input > 0, input, 0.01*input)   
         #################################
         return output
 
     def backward(self, out_grad, input):
         ############ To Do ##############
-        in_grad = None    
+        in_grad = np.where(input > 0, 1, 0.01) * out_grad  
         #################################
         return in_grad

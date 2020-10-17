@@ -2,20 +2,20 @@ from nn.layers import *
 from nn.loss import *
 
 class simple_classifier():
-
+ 
     def __init__(self, n_in, n_out1, n_out2):
         """Initialization
 
         # Arguments
             n_in: the number of input features
             n_out1: the output features of first fully connected layer
-            n_out2: the output features of first fully connected layer
-
+            n_out2: the output features of second fully connected layer
+            
         # Returns
             new_xs: dictionary, new weights of model
         """
-        self.linear1 = Linear(n_in,n_out1)
-        self.linear2= Linear(n_out1,n_out2)
+        self.linear1 = Linear(n_in, n_out1)
+        self.linear2 = Linear(n_out1, n_out2)
         self.relu = ReLU()
         self.softmax_cross_entropy = SoftmaxCrossEntropy(n_out2)
         
@@ -44,13 +44,13 @@ class simple_classifier():
 
         caches = [X] # to save intermedia results for backward pass
         
-        # layer 1
+        # layer 1 forward
         out1 = self.linear1.forward(X)
         caches += [out1]
         out1 = self.relu.forward(out1)
         caches += [out1]
 
-        # layer 2
+        # layer 2 forward
         out2 = self.linear2.forward(out1)
         caches += [out2]
 
@@ -67,12 +67,20 @@ class simple_classifier():
         # loss backward
         inp = self.caches.pop()
         in_grad = self.softmax_cross_entropy.backward(inp, y)
-
-
-        # TODO layer 2 backward
-   
-
-        # TODO layer 1 backward
+        
+        # TODO 
+        #layer 2 backward
+        inp_l2 = self.caches.pop()
+        in_grad_l2 = self.linear2.backward(in_grad, inp_l2)
+        
+        # TODO 
+        #layer 1 backward
+        inp_re = self.caches.pop()
+        in_grad_re = self.relu.backward(in_grad_l2, inp_re)
+        
+        inp_l1 = self.caches.pop()
+        in_grad_l1 = self.linear1.backward(in_grad_re, inp_l1)
+        return in_grad_l1
 
     
     def update(self, new_param_dict):

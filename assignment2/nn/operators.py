@@ -11,7 +11,23 @@ def img2col(data, h_indices, w_indices, k_h, k_w):
     """
     batch = data.shape[0]
     #################### To do ####################
-    out = None
+    _, c, w, h = data.shape
+    #tmp = data.copy()
+    #tmp = tmp.reshape
+    h_len = len(h_indices)
+    w_len = len(w_indices)
+    
+    x = np.zeros((c*k_h*k_w, w_len*h_len))
+    out = np.zeros((batch, c*k_h*k_w, w_len*h_len))
+    for b in range(batch):
+        col = 0
+        for h_i in h_indices:
+            for w_i in w_indices:
+#                 a = temp1[0:c][h_i:h_i + k_h][w_i:w_i + k_w]
+                a = data[b, 0:c, h_i:h_i + k_h, w_i:w_i + k_w].flatten()
+                x[:, col] = a
+                col = col + 1
+        out[b] = x
     ###############################################
     return out
 
@@ -203,12 +219,11 @@ class conv(operator):
         # get initial nodes of receptive fields in height and width direction
         recep_fields_h = [stride*i for i in range(out_height)]
         recep_fields_w = [stride*i for i in range(out_width)]
-
         input_conv = img2col(input_pad, recep_fields_h,
                              recep_fields_w, kernel_h, kernel_w)
         output = np.stack(map(
             lambda x: np.matmul(weights.reshape(out_channel, -1), x) + bias.reshape(-1, 1), input_conv), axis=0)
-
+        
         output = output.reshape(batch, out_channel, out_height, out_width)
         return output
 
@@ -245,9 +260,26 @@ class conv(operator):
         recep_fields_w = [stride*i for i in range(out_width)]
 
         #################### To do ####################
-        in_grad = None
-        w_grad = None
-        b_grad = None
+        input_conv = img2col(input_pad, recep_fields_h,
+                             recep_fields_w, kernel_h, kernel_w)
+        dX = np.stack(map(
+            lambda x: np.matmul(weights.reshape(out_channel, -1).T, x), out_grad.reshape(batch, out_channel, -1)), axis=0)
+                
+        dX_pad = np.zeros(input_pad.shape)
+        t = 0
+        for h in recep_fields_h:
+            for w in recep_fields_w:
+                block = dX[:, :, t]
+                block = block.reshape(batch, in_channel, kernel_h, kernel_w)
+                dX_pad[:, :, h : h + kernel_h, w: w + kernel_w] += block
+                t+=1
+        in_grad = dX_pad[:, :, pad:pad+in_height, pad:pad+in_width] 
+            
+        w_grad = np.stack(map(lambda x, y: np.matmul(x.reshape(out_channel, -1), y.T).reshape(weights.shape), out_grad, input_conv), axis=0)
+        w_grad = np.sum(w_grad, axis = 0)
+        
+        b_grad = np.stack(map(lambda x: np.sum(x.reshape(out_channel, -1), axis = 1), out_grad), axis=0)
+        b_grad = np.sum(b_grad, axis = 0)
         ###############################################
 
         return in_grad, w_grad, b_grad
@@ -294,10 +326,12 @@ class pool(operator):
 
         #################### To do ####################
         output = None
+        input_pool = img2col(input_pad, recep_fields_h, recep_fields_w, pool_height, pool_width)
+        input_pool = input_pool.reshape(batch, in_channel, -1, out_height, out_width)
         if pool_type == 'max':
-            output = None
+            output = np.max(input_pool, axis=2)
         elif pool_type == 'avg':
-            output = None
+            output = np.mean(input_pool, axis=2)
         else:
             raise ValueError('Doesn\'t support \'%s\' pooling.' % pool_type)
         ###############################################

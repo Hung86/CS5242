@@ -511,8 +511,12 @@ class lstm(operator):
         recurrent_kernel_o = recurrent_kernel[:, 3*units:all_units] # recurrent weight of output gate
 
         #################### To do ####################
-        hidden = None
-        cell = None
+        x_f = sigmoid(x.dot(kernel_f) + prev_h.dot(recurrent_kernel_f))
+        x_i = sigmoid(x.dot(kernel_i) + prev_h.dot(recurrent_kernel_i))
+        x_o = sigmoid(x.dot(kernel_o) + prev_h.dot(recurrent_kernel_o))
+        x_c = np.tanh(x.dot(kernel_c) + prev_h.dot(recurrent_kernel_c))
+        cell = x_f*prev_c + x_i*x_c
+        hidden = x_o*np.tanh(cell)
         ###############################################   
 
         return hidden, cell

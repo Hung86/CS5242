@@ -291,6 +291,7 @@ class Flatten(Layer):
             output: numpy array with shape (batch, in_channel*in_height*in_width)
         """
         output = self.flatten.forward(input)
+#         print("-------output shape :", output.shape)
         return output
 
     def backward(self, out_grad, input):
@@ -773,6 +774,7 @@ class BiRNN(Layer):
         for i in range(num_nan.size):
             reversed_x[i] = np.roll(
                 reversed_x[i], x.shape[1]-num_nan[i], axis=0)
+
         return reversed_x
 
     def forward(self, input):
@@ -805,7 +807,13 @@ class BiRNN(Layer):
             in_grad: numpy array with shape (batch, time_steps, in_features), gradients to input
         """
         ##############################To Do ##############################
-        in_grad = None
+        mask = ~np.any(np.isnan(input), axis=2)
+        units = out_grad.shape[2]//2
+        forward_grad = self.forward_rnn.backward(out_grad[:,:,:units], input)
+        backward_grad = self.backward_rnn.backward(self._reverse_temporal_data(out_grad[:,:,units:units*2], mask),
+                                                   self._reverse_temporal_data(input, mask))
+        
+        in_grad = forward_grad + self._reverse_temporal_data(backward_grad, mask)
         ##################################################################
         return in_grad
 
